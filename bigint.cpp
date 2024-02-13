@@ -170,7 +170,7 @@ BigInt BigInt::operator/(const BigInt &rhs) const
       if (this->negative != rhs.negative) {
         mid.negative = true;
       }
-      return mid
+      return mid;
     } else if (cmp < 0) {
       low = mid + 1;
     } else if (cmp > 0) {
@@ -187,12 +187,7 @@ BigInt BigInt::operator/(const BigInt &rhs) const
 
 int BigInt::compare(const BigInt &rhs) const
 {
-  if (this->negative != rhs.negative) 
-  {
-      return this->negative ? -1 : 1;
-  }
-
-  bool reverse = this->negative;
+  bool reverse = this->negative != rhs.negative;
   int magnitude_comparison = this->compare_magnitudes(rhs);
 
   return reverse ? -magnitude_comparison : magnitude_comparison;
@@ -225,7 +220,7 @@ std::string BigInt::to_dec() const
   BigInt current = *this; 
   current.negative = false; 
 
-  std::string result;
+  std::string res;
     
   while (!current.is_zero()) {
       uint64_t remainder = 0;
@@ -234,7 +229,7 @@ std::string BigInt::to_dec() const
           current.magnitude[i] = combined / 10;
           remainder = combined % 10;
       }
-      result = std::to_string(remainder) + result;
+      res = std::to_string(remainder) + result;
         
       while (!current.magnitude.empty() && current.magnitude.back() == 0) {
           current.magnitude.pop_back();
@@ -242,8 +237,13 @@ std::string BigInt::to_dec() const
   }
 
   if (negative) {
-      result = "-" + result;
+      res = "-" + res;
   }
 
-  return result;
+  return res;
+}
+
+bool BigInt::is_zero() const
+{
+    return nums.size() == 1 && nums[0] == 0;
 }
