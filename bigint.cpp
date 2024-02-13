@@ -1,24 +1,33 @@
 #include <cassert>
+#include <sstream>
+#include <iomanip>
+#include <iostream>
 #include "bigint.h"
 
 BigInt::BigInt()
-  // TODO: initialize member variables
 {
+  nums.push_back(0);
+  this->negative = false;
 }
 
 BigInt::BigInt(uint64_t val, bool negative)
-  // TODO: initialize member variables
 {
+  nums.push_back(val);
+  this->negative = negative;
 }
 
 BigInt::BigInt(std::initializer_list<uint64_t> vals, bool negative)
-  // TODO: initialize member variables
 {
+  for (auto i = vals.begin(); i != vals.end(); ++i) {
+    nums.push_back(*i);
+  }
+  this->negative = negative;
 }
 
 BigInt::BigInt(const BigInt &other)
-  // TODO: initialize member variables
 {
+  nums = other.get_bit_vector();
+  this->negative = other.is_negative();
 }
 
 BigInt::~BigInt()
@@ -32,16 +41,21 @@ BigInt &BigInt::operator=(const BigInt &rhs)
 
 bool BigInt::is_negative() const
 {
-  // TODO: implement
+  return negative;
 }
 
 const std::vector<uint64_t> &BigInt::get_bit_vector() const {
-  // TODO: implement
+  return nums;
 }
 
 uint64_t BigInt::get_bits(unsigned index) const
 {
-  // TODO: implement
+  try {
+    return nums.at(index);
+  } catch (...) {
+    return 0;
+  }
+
 }
 
 BigInt BigInt::operator+(const BigInt &rhs) const
@@ -57,7 +71,11 @@ BigInt BigInt::operator-(const BigInt &rhs) const
 
 BigInt BigInt::operator-() const
 {
-  // TODO: implement
+  BigInt to_return = *(new BigInt(*this));
+  if (to_return.to_hex() != "0") {
+    to_return.negative = !to_return.is_negative();
+  }
+  return to_return;
 }
 
 bool BigInt::is_bit_set(unsigned n) const
@@ -87,11 +105,27 @@ int BigInt::compare(const BigInt &rhs) const
 
 std::string BigInt::to_hex() const
 {
-  // TODO: implement
+  std::stringstream val_stream;
+  if (negative) {
+    val_stream << "-";
+  }
+  for (auto i = nums.end(); i != nums.begin() - 1; --i) {
+    if (val_stream.str() != "" && val_stream.str() != "-") {
+      val_stream << std::setfill('0') << std::setw(16);
+    }
+    if (*i != 0) {
+      val_stream << std::hex << *i;
+    } else if (i != nums.end() && val_stream.str() != "") {
+      val_stream << 0;
+    }
+  }
+  if (val_stream.str() == "") {
+    val_stream << 0;
+  }
+  return val_stream.str();
 }
 
 std::string BigInt::to_dec() const
 {
   // TODO: implement
 }
-
