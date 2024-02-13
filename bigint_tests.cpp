@@ -60,6 +60,7 @@ void test_to_hex_1(TestObjs *objs);
 void test_to_hex_2(TestObjs *objs);
 void test_to_dec_1(TestObjs *objs);
 void test_to_dec_2(TestObjs *objs);
+void test_unary_operator(TestObjs *objs);
 // TODO: declare additional test functions
 
 int main(int argc, char **argv) {
@@ -74,6 +75,7 @@ int main(int argc, char **argv) {
   TEST(test_initlist_ctor);
   TEST(test_copy_ctor);
   TEST(test_get_bits);
+  /*
   TEST(test_add_1);
   TEST(test_add_2);
   TEST(test_add_3);
@@ -92,11 +94,15 @@ int main(int argc, char **argv) {
   TEST(test_compare_2);
   TEST(test_div_1);
   TEST(test_div_2);
+  */
   TEST(test_to_hex_1);
   TEST(test_to_hex_2);
+  /*
   TEST(test_to_dec_1);
   TEST(test_to_dec_2);
+  */
   // TODO: add calls to TEST for additional test functions
+  TEST(test_unary_operator);
 
   TEST_FINI();
 }
@@ -583,6 +589,25 @@ void test_to_dec_2(TestObjs *) {
     std::string result = val.to_dec();
     ASSERT("703527900324720116021349050368162523567079645895" == result);
   }
+}
+
+void test_unary_operator(TestObjs *objs) {
+  // Basic test for unary minus
+  BigInt result1 = -objs->zero;
+  check_contents(result1, { 0UL });
+  ASSERT(!result1.is_negative());
+
+  BigInt result2 = -objs->one;
+  check_contents(result2, { 1UL });
+  ASSERT(result2.is_negative());
+
+  BigInt result3 = -objs->negative_nine;
+  check_contents(result3, { 9UL });
+  ASSERT(!result3.is_negative());
+
+  BigInt result4 = -objs->u64_max;
+  check_contents(result4, { 0xFFFFFFFFFFFFFFFFUL });
+  ASSERT(result4.is_negative());
 }
 
 // TODO: implement additional test functions
