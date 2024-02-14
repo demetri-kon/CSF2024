@@ -72,10 +72,11 @@ BigInt BigInt::operator+(const BigInt &rhs) const
         res.negative = rhs.negative; 
     }
       return res;
+  } else {
+    res = this->add_magnitudes(rhs); 
+    res.negative = this->negative; 
   }
-  res = this->add_magnitudes(rhs); 
-  res.negative = this->negative; 
-  return res;
+  return res; 
 }
 
 BigInt BigInt::operator-(const BigInt &rhs) const
@@ -223,13 +224,13 @@ std::string BigInt::to_dec() const
   std::string res;
     
   while (!current.is_zero()) {
-      uint64_t remainder = 0;
+      uint64_t quotient = 0;
       for (int i = current.magnitude.size() - 1; i >= 0; --i) {
-          uint64_t combined = remainder * (UINT64_MAX + 1ULL) + current.magnitude[i];
+          uint64_t combined = quotient * (UINT64_MAX + 1ULL) + current.magnitude[i];
           current.magnitude[i] = combined / 10;
-          remainder = combined % 10;
+          quotient = combined % 10;
       }
-      res = std::to_string(remainder) + result;
+      res = std::to_string(quotient) + res;
         
       while (!current.magnitude.empty() && current.magnitude.back() == 0) {
           current.magnitude.pop_back();
