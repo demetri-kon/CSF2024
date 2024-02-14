@@ -243,6 +243,74 @@ std::string BigInt::to_dec() const
   return res;
 }
 
+int BigInt::compare_magnitude(const BigInt &rhs) const
+{
+  if (this->magnitude.size() < rhs.magnitude.size()) {
+      return -1;
+  } else if (this->magnitude.size() > rhs.magnitude.size()) {
+      return 1;
+  } else {
+      for (size_t i = this->magnitude.size(); i > 0; --i) {
+          if (this->magnitude[i - 1] < rhs.magnitude[i - 1]) {
+              return -1;
+          } else if (this->magnitude[i - 1] > rhs.magnitude[i - 1]) {
+              return 1;
+          }
+      }
+      return 0;
+  }
+}
+
+BigInt BigInt::add_magnitudes(const BigInt &rhs) const
+{
+  BigInt res;
+  uint64_t carry = 0;
+  size_t max_size = std::max(this->magnitude.size(), rhs.magnitude.size());
+
+  for (size_t i = 0; i < max_size; ++i) {
+      uint64_t sum_result = carry;
+      if (i < this->magnitude.size()) {
+          sum_result += this->magnitude[i];
+      }
+      if (i < rhs.magnitude.size()) {
+          sum_result += rhs.magnitude[i];
+      }
+
+      carry = sum_result >> 64;
+
+      res.magnitude.push_back(sum_result & 0xFFFFFFFFFFFFFFFF);
+  }
+
+  if (carry != 0) {
+      res.magnitude.push_back(carry);
+  }
+
+  return res;
+}
+
+BigInt BigInt::subtract_magnitudes(const BigInt &rhs) const
+{
+  BigInt res;
+  uint64_t borrow = 0;
+
+  for (size_t i = 0; i < this->magnitude.size(); ++i) {
+      uint64_t sub_result = this->magnitude[i] - borrow;
+      if (i < rhs.magnitude.size()) {
+          sub_result -= rhs.magnitude[i];
+      }
+
+      borrow = (sub_result > this->magnitude[i]) ? 1 : 0;
+
+      res.magnitude.push_back(sub_result);
+  }
+
+  while (!res.magnitude.empty() && res.magnitude.back() == 0) {
+      res.magnitude.pop_back();
+  }
+
+  return res;
+}
+
 bool BigInt::is_zero() const
 {
     return nums.size() == 1 && nums[0] == 0;
