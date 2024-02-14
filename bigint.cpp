@@ -111,18 +111,18 @@ BigInt BigInt::operator<<(unsigned n) const
   unsigned shift_bits = n % 64;
   uint64_t carry = 0;
 
-  res.magnitude.resize(magnitude.size() + shift_chunks, 0);
+  res.nums.resize(nums.size() + shift_chunks, 0);
 
-  for (size_t i = 0; i < magnitude.size(); ++i) {
-    uint64_t shifted_chunk = magnitude[i] << shift_bits;
+  for (size_t i = 0; i < nums.size(); ++i) {
+    uint64_t shifted_chunk = nums[i] << shift_bits;
 
-    res.magnitude[i + shift_chunks] |= (shifted_chunk | carry);
+    res.nums[i + shift_chunks] |= (shifted_chunk | carry);
 
-    carry = (magnitude[i] >> (64 - shift_bits));
+    carry = (nums[i] >> (64 - shift_bits));
     }
 
   if (carry != 0) {
-      res.magnitude.push_back(carry);
+      res.nums.push_back(carry);
   }
 
   return res; 
@@ -136,8 +136,7 @@ BigInt BigInt::operator*(const BigInt &rhs) const
   const BigInt& pos_lhs = this->negative ? -*this : *this;
   const BigInt& pos_rhs = rhs.negative ? -rhs : rhs;
 
-    // Perform multiplication using the standard algorithm
-  for (int i = 0; i < pos_rhs.magnitude.size() * 64; i++)
+  for (int i = 0; i < pos_rhs.nums.size() * 64; i++)
   {
     if (pos_rhs.is_bit_set(i)) {
         product = product + (pos_lhs << i);
@@ -221,7 +220,7 @@ std::string BigInt::to_dec() const
   BigInt current = *this; 
   std::string res;
 
-  for (auto it = current.magnitude.rbegin(); it != current.magnitude.rend(); ++it) {
+  for (auto it = current.nums.rbegin(); it != current.nums.rend(); ++it) {
     uint64_t carry = *it;
 
     for (int i = 0; i < 64; ++i) {
@@ -230,7 +229,7 @@ std::string BigInt::to_dec() const
 
       res = std::to_string(remainder) + res;
       carry = quotient;
-      if (carry == 0 && it == current.magnitude.rbegin() + 1 && i < 63) {
+      if (carry == 0 && it == current.nums.rbegin() + 1 && i < 63) {
         break;
       }
     }
@@ -245,15 +244,15 @@ std::string BigInt::to_dec() const
 
 int BigInt::compare_magnitude(const BigInt &rhs) const
 {
-  if (this->magnitude.size() < rhs.magnitude.size()) {
+  if (this->nums.size() < rhs.nums.size()) {
       return -1;
-  } else if (this->magnitude.size() > rhs.magnitude.size()) {
+  } else if (this->nums.size() > rhs.nums.size()) {
       return 1;
   } else {
-      for (size_t i = this->magnitude.size(); i > 0; --i) {
-          if (this->magnitude[i - 1] < rhs.magnitude[i - 1]) {
+      for (size_t i = this->nums.size(); i > 0; --i) {
+          if (this->nums[i - 1] < rhs.nums[i - 1]) {
               return -1;
-          } else if (this->magnitude[i - 1] > rhs.magnitude[i - 1]) {
+          } else if (this->nums[i - 1] > rhs.nums[i - 1]) {
               return 1;
           }
       }
@@ -265,24 +264,24 @@ BigInt BigInt::add_magnitudes(const BigInt &rhs) const
 {
   BigInt res;
   uint64_t carry = 0;
-  size_t max_size = std::max(this->magnitude.size(), rhs.magnitude.size());
+  size_t max_size = std::max(this->nums.size(), rhs.nums.size());
 
   for (size_t i = 0; i < max_size; ++i) {
       uint64_t sum_result = carry;
-      if (i < this->magnitude.size()) {
-          sum_result += this->magnitude[i];
+      if (i < this->nums.size()) {
+          sum_result += this->nums[i];
       }
-      if (i < rhs.magnitude.size()) {
-          sum_result += rhs.magnitude[i];
+      if (i < rhs.nums.size()) {
+          sum_result += rhs.nums[i];
       }
 
       carry = sum_result >> 64;
 
-      res.magnitude.push_back(sum_result & UINT64_MAX);
+      res.nums.push_back(sum_result & UINT64_MAX);
   }
 
   if (carry != 0) {
-      res.magnitude.push_back(carry);
+      res.nums.push_back(carry);
   }
 
   return res;
@@ -293,19 +292,19 @@ BigInt BigInt::subtract_magnitudes(const BigInt &rhs) const
   BigInt res;
   uint64_t borrow = 0;
 
-  for (size_t i = 0; i < this->magnitude.size(); ++i) {
-      uint64_t sub_result = this->magnitude[i] - borrow;
-      if (i < rhs.magnitude.size()) {
-          sub_result -= rhs.magnitude[i];
+  for (size_t i = 0; i < this->nums.size(); ++i) {
+      uint64_t sub_result = this->nums[i] - borrow;
+      if (i < rhs.nums.size()) {
+          sub_result -= rhs.nums[i];
       }
 
-      borrow = (sub_result > this->magnitude[i]) ? 1 : 0;
+      borrow = (sub_result > this->nums[i]) ? 1 : 0;
 
-      res.magnitude.push_back(sub_result);
+      res.nums.push_back(sub_result);
   }
 
-  while (!res.magnitude.empty() && res.magnitude.back() == 0) {
-      res.magnitude.pop_back();
+  while (!res.nums.empty() && res.nums.back() == 0) {
+      res.nums.pop_back();
   }
 
   return res;
