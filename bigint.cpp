@@ -278,7 +278,7 @@ BigInt BigInt::add_magnitudes(const BigInt &rhs) const
 
       carry = sum_result >> 64;
 
-      res.magnitude.push_back(sum_result & 0xFFFFFFFFFFFFFFFF);
+      res.magnitude.push_back(sum_result & UINT64_MAX);
   }
 
   if (carry != 0) {
