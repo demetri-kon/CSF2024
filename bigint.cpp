@@ -219,26 +219,25 @@ std::string BigInt::to_hex() const
 std::string BigInt::to_dec() const
 {
   BigInt current = *this; 
-  current.negative = false; 
-
   std::string res;
-    
-  while (!current.is_zero()) {
-      uint64_t quotient = 0;
-      for (int i = current.magnitude.size() - 1; i >= 0; --i) {
-          uint64_t combined = quotient * (UINT64_MAX + 1ULL) + current.magnitude[i];
-          current.magnitude[i] = combined / 10;
-          quotient = combined % 10;
+
+  for (auto it = current.magnitude.rbegin(); it != current.magnitude.rend(); ++it) {
+    uint64_t carry = *it;
+
+    for (int i = 0; i < 64; ++i) {
+      uint64_t quotient = carry / 10;
+      uint64_t remainder = carry % 10;
+
+      res = std::to_string(remainder) + res;
+      carry = quotient;
+      if (carry == 0 && it == current.magnitude.rbegin() + 1 && i < 63) {
+        break;
       }
-      res = std::to_string(quotient) + res;
-        
-      while (!current.magnitude.empty() && current.magnitude.back() == 0) {
-          current.magnitude.pop_back();
-      }
+    }
   }
 
   if (negative) {
-      res = "-" + res;
+    res = "-" + res;
   }
 
   return res;
